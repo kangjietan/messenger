@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  updateMessage,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -69,9 +70,16 @@ export const logout = (id) => async (dispatch) => {
 
 // CONVERSATIONS THUNK CREATORS
 
+const sortByCreatedDate = (a, b) => {
+  return new Date(a.createdAt) - new Date(b.createdAt);
+};
+
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
+    data.forEach((conversation) => {
+      conversation.messages.sort(sortByCreatedDate);
+    });
     dispatch(gotConversations(data));
   } catch (error) {
     console.error(error);
@@ -93,9 +101,9 @@ const sendMessage = (data, body) => {
 
 // message format to send: {recipientId, text, conversationId}
 // conversationId will be set to null if its a brand new conversation
-export const postMessage = (body) => (dispatch) => {
+export const postMessage = (body) => async (dispatch) => {
   try {
-    const data = saveMessage(body);
+    const data = await saveMessage(body);
 
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
@@ -113,6 +121,20 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   try {
     const { data } = await axios.get(`/api/users/${searchTerm}`);
     dispatch(setSearchedUsers(data));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updateReadStatus = async (body) => {
+  const { data } = await axios.patch("/api/messages/status", body);
+  return data;
+};
+
+export const updateMessageReadStatus = (body, convoId) => async (dispatch) => {
+  try {
+    const response = await updateReadStatus(body);
+    dispatch(updateMessage(body.messageId, body.readStatus, convoId));
   } catch (error) {
     console.error(error);
   }

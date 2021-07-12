@@ -9,12 +9,35 @@ router.post("/", async (req, res, next) => {
       return res.sendStatus(401);
     }
     const senderId = req.user.id;
-    const { recipientId, text, conversationId, sender } = req.body;
+    const { recipientId, text, conversationId, sender, read } = req.body;
 
     // if we already know conversation id, we can save time and just add it to message and return
     if (conversationId) {
-      const message = await Message.create({ senderId, text, conversationId });
+<<<<<<< HEAD
+      const conversationSearch = await Conversation.findByPk(conversationId);
+      const { dataValues } = conversationSearch;
+      const { user1Id, user2Id } = dataValues;
+
+      if (senderId === user1Id || senderId === user2Id) {
+        const message = await Message.create({
+          senderId,
+          text,
+          conversationId,
+          read,
+        });
+        return res.json({ message, sender });
+      } else {
+        res.status(401).json({ error: "User is not part of conversation." });
+      }
+=======
+      const message = await Message.create({
+        senderId,
+        text,
+        conversationId,
+        read,
+      });
       return res.json({ message, sender });
+>>>>>>> 7e04f8b... Add endpoint to update read status of message
     }
     // if we don't have conversation id, find a conversation to make sure it doesn't already exist
     let conversation = await Conversation.findConversation(
@@ -36,8 +59,29 @@ router.post("/", async (req, res, next) => {
       senderId,
       text,
       conversationId: conversation.id,
+      read,
     });
     res.json({ message, sender });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/status", async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const { messageId, readStatus } = req.body;
+    const messageQuery = await Message.update({ read: readStatus }, {
+      where: {
+        id: messageId,
+      }
+    });
+
+    res.json({
+      success: `Succesfully updated status of message to ${readStatus}.`,
+    });
   } catch (error) {
     next(error);
   }

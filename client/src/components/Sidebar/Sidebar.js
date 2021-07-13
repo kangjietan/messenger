@@ -27,11 +27,14 @@ const Sidebar = (props) => {
   const filteredConversationByUserInMessages = conversations.filter(
     (conversation) => {
       // When searching and the user has not had started a convo, return user
-      if (conversation.messages.length === 0) return true;
-      // If user is part of convo
-      if (conversation.user2 === null || conversation.user1 === null)
+      if (conversation.messages.length === 0) {
         return true;
-        
+      }
+      // If user is part of convo
+      if (conversation.user2 === null || conversation.user1 === null) {
+        return true;
+      }
+
       return false;
     }
   );

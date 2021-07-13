@@ -33,11 +33,16 @@ class Input extends Component {
 
   handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (this.props.user2 && this.props.otherUser.id) {
-      return;
+      if (
+        this.props.user2 !== this.props.user.id ||
+        this.props.otherUser.id !== this.props.user.id
+      ) {
+        return;
+      }
     }
-    
+
     // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
     const reqBody = {
       text: event.target.text.value,

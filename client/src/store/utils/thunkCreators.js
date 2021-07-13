@@ -69,9 +69,16 @@ export const logout = (id) => async (dispatch) => {
 
 // CONVERSATIONS THUNK CREATORS
 
+const sortByCreatedDate = (a, b) => {
+  return new Date(a.createdAt) - new Date(b.createdAt);
+};
+
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
+    data.forEach((conversation) => {
+      conversation.messages.sort(sortByCreatedDate);
+    });
     dispatch(gotConversations(data));
   } catch (error) {
     console.error(error);

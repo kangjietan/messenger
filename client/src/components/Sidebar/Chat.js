@@ -19,14 +19,33 @@ const styles = {
   },
 };
 
+const unreadMessagesStyles = {
+  fontFamily: "Open Sans",
+  backgroundColor: "#3A8DFF",
+  color: "white",
+  borderRadius: "50%",
+  padding: '8px',
+  marginRight: '0.3rem',
+  fontWeight: 'bold',
+  textAlign: 'center',
+  fontSize: '14px',
+  lineHeight: '1.5',
+  letterSpacing: '-0.2',
+};
+
 class Chat extends Component {
   handleClick = async (conversation) => {
     await this.props.setActiveChat(conversation.otherUser.username);
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, conversation } = this.props;
     const otherUser = this.props.conversation.otherUser;
+    let unreadMessages = 0;
+    conversation.messages.forEach((message) => {
+      if (!message.read && message.senderId === otherUser.id) unreadMessages++;
+    });
+
     return (
       <Box
         onClick={() => this.handleClick(this.props.conversation)}
@@ -39,6 +58,9 @@ class Chat extends Component {
           sidebar={true}
         />
         <ChatContent conversation={this.props.conversation} />
+        {unreadMessages > 0 && (
+          <div style={unreadMessagesStyles}>{unreadMessages}</div>
+        )}
       </Box>
     );
   }

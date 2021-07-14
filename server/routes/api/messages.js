@@ -49,7 +49,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.post("/status", async (req, res, next) => {
+router.patch("/status", async (req, res, next) => {
   try {
     if (!req.user) {
       return res.sendStatus(401);

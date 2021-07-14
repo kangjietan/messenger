@@ -127,7 +127,7 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
 };
 
 const updateReadStatus = async (body) => {
-  const { data } = await axios.post("/api/messages/status", body);
+  const { data } = await axios.patch("/api/messages/status", body);
   return data;
 };
 

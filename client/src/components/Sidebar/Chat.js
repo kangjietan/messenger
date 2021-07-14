@@ -24,13 +24,14 @@ const unreadMessagesStyles = {
   backgroundColor: "#3A8DFF",
   color: "white",
   borderRadius: "50%",
-  padding: '8px',
-  marginRight: '0.3rem',
-  fontWeight: 'bold',
-  textAlign: 'center',
-  fontSize: '14px',
-  lineHeight: '1.5',
-  letterSpacing: '-0.2',
+  padding: "8px",
+  marginRight: "0.3rem",
+  fontWeight: "bold",
+  textAlign: "center",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  letterSpacing: "-0.2",
+  width: "2rem",
 };
 
 class Chat extends Component {
@@ -57,7 +58,10 @@ class Chat extends Component {
           online={otherUser.online}
           sidebar={true}
         />
-        <ChatContent conversation={this.props.conversation} />
+        <ChatContent
+          conversation={this.props.conversation}
+          unreadMessages={unreadMessages}
+        />
         {unreadMessages > 0 && (
           <div style={unreadMessagesStyles}>{unreadMessages}</div>
         )}

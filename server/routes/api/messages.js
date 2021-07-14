@@ -55,14 +55,11 @@ router.post("/status", async (req, res, next) => {
       return res.sendStatus(401);
     }
     const { messageId, readStatus } = req.body;
-    console.log(messageId, readStatus)
     const messageQuery = await Message.update({ read: readStatus }, {
       where: {
         id: messageId,
       }
     });
-
-    console.log("Updating Message Status", messageQuery);
 
     res.json({
       success: `Succesfully updated status of message to ${readStatus}.`,

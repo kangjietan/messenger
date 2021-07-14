@@ -30,11 +30,9 @@ const ActiveChat = (props) => {
   );
 
   useEffect(() => {
-    console.log("<ActiveChat /> props", conversation);
     if (conversation.messages) {
       conversation.messages.forEach((message) => {
         if (message.read === false) {
-          console.log("Message UNREAD");
           updateMessageReadStatus(
             { messageId: message.id, readStatus: true },
             conversation.id

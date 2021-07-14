@@ -134,7 +134,6 @@ const updateReadStatus = async (body) => {
 export const updateMessageReadStatus = (body, convoId) => async (dispatch) => {
   try {
     const response = await updateReadStatus(body);
-    console.log("DISPATCH", body, convoId);
     dispatch(updateMessage(body.messageId, body.readStatus, convoId));
   } catch (error) {
     console.error(error);

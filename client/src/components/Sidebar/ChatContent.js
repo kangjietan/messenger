@@ -47,7 +47,12 @@ const ChatContent = (props) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography
+          className={classes.previewText}
+          style={
+            props.unreadMessages ? { fontWeight: "bold", color: "black" } : {}
+          }
+        >
           {latestMessageText}
         </Typography>
       </Box>

@@ -20,12 +20,8 @@ const styles = {
 };
 
 const unreadMessagesStyles = {
-  fontFamily: "Open Sans",
-  backgroundColor: "#3A8DFF",
   color: "white",
   borderRadius: "50%",
-  padding: "8px",
-  marginRight: "0.3rem",
   fontWeight: "bold",
   textAlign: "center",
   fontSize: "14px",
@@ -63,7 +59,9 @@ class Chat extends Component {
           unreadMessages={unreadMessages}
         />
         {unreadMessages > 0 && (
-          <div style={unreadMessagesStyles}>{unreadMessages}</div>
+          <Box style={unreadMessagesStyles} p={1} mr={1} bgcolor="primary.main">
+            {unreadMessages}
+          </Box>
         )}
       </Box>
     );

@@ -22,6 +22,7 @@ router.post("/", async (req, res, next) => {
           senderId,
           text,
           conversationId,
+          read,
         });
         return res.json({ message, sender });
       } else {

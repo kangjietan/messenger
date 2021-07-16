@@ -64,10 +64,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("logout", (id) => {
-    delete socketsSession[id];
     if (onlineUsers.includes(id)) {
       userIndex = onlineUsers.indexOf(id);
       onlineUsers.splice(userIndex, 1);
+      delete socketsSession[id];
       socket.broadcast.emit("remove-offline-user", id);
     }
   });

@@ -6,7 +6,11 @@ import {
   addOnlineUser,
 } from "./store/conversations";
 
-const socket = io(window.location.origin);
+const token = localStorage.getItem("messenger-token");
+
+const socket = io.connect(window.location.origin, {
+  query: { token },
+});
 
 socket.on("connect", () => {
   socket.on("add-online-user", (id) => {

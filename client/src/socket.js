@@ -8,7 +8,6 @@ import {
 
 const token = localStorage.getItem("messenger-token");
 
-// const socket = io(window.location.origin);
 const socket = io.connect(window.location.origin, {
   query: { token },
 });

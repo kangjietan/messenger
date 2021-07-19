@@ -10,6 +10,7 @@ require("dotenv").config();
 const { app, sessionStore } = require("../app");
 const http = require("http");
 const db = require("../db");
+const jwt = require("jsonwebtoken");
 const onlineUsers = require("../onlineUsers");
 
 /**
@@ -31,26 +32,55 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server);
 
-io.on("connection", (socket) => {
-  socket.on("go-online", (id) => {
-    if (!onlineUsers.includes(id)) {
-      onlineUsers.push(id);
+const authenticateSocketWithJwt = (socket, next) => {
+  if (socket.handshake.query && socket.handshake.query.token) {
+    jwt.verify(
+      socket.handshake.query.token,
+      process.env.SESSION_SECRET,
+      function (err, decoded) {
+        if (err) return next(new Error("Authentication error"));
+        socket.decoded = decoded;
+        next();
+      }
+    );
+  } else {
+    next(new Error("Authentication error"));
+  }
+};
+
+io.use(authenticateSocketWithJwt).on("connection", (socket) => {
+  socket.on("go-online", (data) => {
+    const { userId, socketId } = data;
+    const userOnline = onlineUsers.get(userId);
+    if (!userOnline) {
+      onlineUsers.set(userId, { socketId });
+    } else {
+      if (userOnline.socketId !== socketId && socketId !== undefined) {
+        onlineUsers.set(userId, { socketId });
+      }
     }
     // send the user who just went online to everyone else who is already online
-    socket.broadcast.emit("add-online-user", id);
+    socket.broadcast.emit("add-online-user", userId);
   });
 
   socket.on("new-message", (data) => {
-    socket.broadcast.emit("new-message", {
-      message: data.message,
-      sender: data.sender,
-    });
+    const { recipientId, message, senderSocketId } = data;
+    if (!onlineUsers.get(message.senderId) && senderSocketId) {
+      onlineUsers.set(message.senderId, { socketId: senderSocketId });
+      socket.broadcast.emit("add-online-user", message.senderId);
+    }
+    const recipientOnline = onlineUsers.get(recipientId);
+    if (recipientOnline) {
+      io.to(recipientOnline.socketId).emit("new-message", {
+        message: data.message,
+        sender: data.sender,
+      });
+    }
   });
 
   socket.on("logout", (id) => {
-    if (onlineUsers.includes(id)) {
-      userIndex = onlineUsers.indexOf(id);
-      onlineUsers.splice(userIndex, 1);
+    if (onlineUsers.get(id)) {
+      onlineUsers.delete(id);
       socket.broadcast.emit("remove-offline-user", id);
     }
   });

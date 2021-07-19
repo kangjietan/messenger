@@ -32,8 +32,6 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server);
 
-const socketsSession = {};
-
 const authenticateSocketWithJwt = (socket, next) => {
   if (socket.handshake.query && socket.handshake.query.token) {
     jwt.verify(
@@ -50,18 +48,16 @@ const authenticateSocketWithJwt = (socket, next) => {
   }
 };
 
-const setUserSocketId = (userId, socketId) => {
-  if (userId !== undefined && socketId !== undefined) {
-    socketsSession[userId] = socketId;
-  }
-};
-
 io.use(authenticateSocketWithJwt).on("connection", (socket) => {
   socket.on("go-online", (data) => {
     const { userId, socketId } = data;
-    setUserSocketId(userId, socketId);
-    if (!onlineUsers.includes(userId)) {
-      onlineUsers.push(userId);
+    const userOnline = onlineUsers.get(userId);
+    if (!userOnline) {
+      onlineUsers.set(userId, { socketId });
+    } else {
+      if (userOnline.socketId !== socketId && socketId !== undefined) {
+        onlineUsers.set(userId, { socketId });
+      }
     }
     // send the user who just went online to everyone else who is already online
     socket.broadcast.emit("add-online-user", userId);
@@ -69,11 +65,13 @@ io.use(authenticateSocketWithJwt).on("connection", (socket) => {
 
   socket.on("new-message", (data) => {
     const { recipientId, message, senderSocketId } = data;
-    if (socketsSession[message.senderId] === undefined) {
-      setUserSocketId(message.senderId, senderSocketId);
+    if (!onlineUsers.get(message.senderId) && senderSocketId) {
+      onlineUsers.set(message.senderId, { socketId: senderSocketId });
+      socket.broadcast.emit("add-online-user", message.senderId);
     }
-    if (socketsSession[recipientId]) {
-      io.to(socketsSession[recipientId]).emit("new-message", {
+    const recipientOnline = onlineUsers.get(recipientId);
+    if (recipientOnline) {
+      io.to(recipientOnline.socketId).emit("new-message", {
         message: data.message,
         sender: data.sender,
       });
@@ -81,10 +79,8 @@ io.use(authenticateSocketWithJwt).on("connection", (socket) => {
   });
 
   socket.on("logout", (id) => {
-    if (onlineUsers.includes(id)) {
-      userIndex = onlineUsers.indexOf(id);
-      onlineUsers.splice(userIndex, 1);
-      delete socketsSession[id];
+    if (onlineUsers.get(id)) {
+      onlineUsers.delete(id);
       socket.broadcast.emit("remove-offline-user", id);
     }
   });

@@ -8,14 +8,10 @@ import {
 
 const token = localStorage.getItem("messenger-token");
 
-<<<<<<< HEAD
-=======
-// const socket = io(window.location.origin);
 const socket = io.connect(window.location.origin, {
   query: { token },
 });
 
->>>>>>> sockets-improvement
 socket.on("connect", () => {
   socket.on("add-online-user", (id) => {
     store.dispatch(addOnlineUser(id));

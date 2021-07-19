@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
@@ -14,7 +14,7 @@ const styles = {
   },
 };
 
-class Home extends Component {
+class Home2 extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -60,6 +60,43 @@ class Home extends Component {
     );
   }
 }
+
+const Home = (props) => {
+  const { fetchConversations, user, classes, logout } = props;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+
+  useEffect(() => {
+    setIsLoggedIn(true);
+  }, [user.id]);
+
+  const handleLogout = async () => {
+    await logout(user.id);
+  };
+
+  if (!user.id) {
+    // If we were previously logged in, redirect to login instead of register
+    if (isLoggedIn) return <Redirect to="/login" />;
+    return <Redirect to="/register" />;
+  }
+
+  return (
+    <>
+      {/* logout button will eventually be in a dropdown next to username */}
+      <Button className={classes.logout} onClick={handleLogout}>
+        Logout
+      </Button>
+      <Grid container component="main" className={classes.root}>
+        <CssBaseline />
+        <SidebarContainer />
+        <ActiveChat />
+      </Grid>
+    </>
+  );
+};
 
 const mapStateToProps = (state) => {
   return {

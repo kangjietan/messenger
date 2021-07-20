@@ -63,6 +63,7 @@ const Chat = (props) => {
   );
 };
 
+
 const mapDispatchToProps = (dispatch) => {
   return {
     setActiveChat: (id) => {
